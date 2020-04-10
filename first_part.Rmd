@@ -1,0 +1,66 @@
+---
+title: "first_part"
+author: "Leandro de Carvalho Maia"
+date: "4/9/2020"
+output:
+  html_document:
+    df_print: paged
+---
+## Environment Setup
+```{r}
+
+library(tidyverse)
+library(plotly)
+library(seasonal)
+library(esquisse)
+library(corrplot)
+```
+
+# Create a home directory variable
+```{r}
+home <- 'C:/Users/leandroc/Documents/curso_R/project_data_science__with_r/'
+
+```
+# Load the file us_change and 
+```{r}
+# Concatenation for the file path
+file_path = paste(home, "us_change.rda", sep = "")
+load(file_path)
+
+```
+
+# Create a new tibble with cleaned names:
+```{r}
+raw_data <- tibble::as_tibble(us_change)
+raw_data <- janitor::clean_names(raw_data)
+
+```
+
+# Converte all the variables in index number: 
+```{r}
+# To index it is using the 1° quarter of 2000 at the index 121
+absolute <- 121
+indexed_data <- raw_data
+
+
+for(i in 1:length(indexed_data$consumption)){
+  indexed_data$consumption[i] <- (indexed_data$consumption[i] / raw_data$consumption[absolute]) * 100
+}
+
+for(i in 1:length(indexed_data$income)){
+  indexed_data$income[i] <- (indexed_data$income[i] / raw_data$income[absolute]) * 100
+}
+
+for(i in 1:length(indexed_data$production)){
+  indexed_data$production[i] <- (indexed_data$production[i] / raw_data$production[absolute]) * 100
+}
+
+for(i in 1:length(indexed_data$savings)){
+  indexed_data$savings[i] <- (indexed_data$savings[i] / raw_data$savings[absolute]) * 100
+}
+
+for(i in 1:length(indexed_data$unemployment)){
+  indexed_data$unemployment[i] <- (indexed_data$unemployment[i] / raw_data$unemployment[absolute]) * 100
+}
+
+```
