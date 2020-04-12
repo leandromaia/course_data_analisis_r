@@ -1,10 +1,11 @@
 ---
-title: "first_part"
+title: "Análise Exploratória de Dados com R - Primeira Parte"
 author: "Leandro de Carvalho Maia"
 date: "4/9/2020"
 output:
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 ## Environment Setup
 ```{r}
@@ -14,53 +15,107 @@ library(plotly)
 library(seasonal)
 library(esquisse)
 library(corrplot)
-```
+source('C:/Users/leandroc/Documents/curso_R/multiplot.R')
 
 # Create a home directory variable
-```{r}
 home <- 'C:/Users/leandroc/Documents/curso_R/project_data_science__with_r/'
 
-```
 # Load the file us_change and 
-```{r}
-# Concatenation for the file path
 file_path = paste(home, "us_change.rda", sep = "")
 load(file_path)
-
 ```
 
-# Create a new tibble with cleaned names:
+# Item a) -> Criar novo tibble padronizando os nomes das variáveis:
 ```{r}
-raw_data <- tibble::as_tibble(us_change)
-raw_data <- janitor::clean_names(raw_data)
-
+indexed_data <- us_change %>% janitor::clean_names() %>% filter(quarter >= '2000-01-01')
 ```
 
-# Converte all the variables in index number: 
+## Salvando as variáveis do primeiro trimestre de 2000:
 ```{r}
-# To index it is using the 1° quarter of 2000 at the index 121
-absolute <- 121
-indexed_data <- raw_data
+data_2010Q1 <- indexed_data %>% filter(quarter == '2000-01-01')
+```
 
-
+## Conversão para número índice: 
+```{r}
 for(i in 1:length(indexed_data$consumption)){
-  indexed_data$consumption[i] <- (indexed_data$consumption[i] / raw_data$consumption[absolute]) * 100
+  indexed_data$consumption[i] <- (indexed_data$consumption[i] / data_2010Q1$consumption) * 100
 }
 
 for(i in 1:length(indexed_data$income)){
-  indexed_data$income[i] <- (indexed_data$income[i] / raw_data$income[absolute]) * 100
+  indexed_data$income[i] <- (indexed_data$income[i] / data_2010Q1$income) * 100
 }
 
 for(i in 1:length(indexed_data$production)){
-  indexed_data$production[i] <- (indexed_data$production[i] / raw_data$production[absolute]) * 100
+  indexed_data$production[i] <- (indexed_data$production[i] / data_2010Q1$production) * 100
 }
 
 for(i in 1:length(indexed_data$savings)){
-  indexed_data$savings[i] <- (indexed_data$savings[i] / raw_data$savings[absolute]) * 100
+  indexed_data$savings[i] <- (indexed_data$savings[i] / data_2010Q1$savings) * 100
 }
 
 for(i in 1:length(indexed_data$unemployment)){
-  indexed_data$unemployment[i] <- (indexed_data$unemployment[i] / raw_data$unemployment[absolute]) * 100
+  indexed_data$unemployment[i] <- (indexed_data$unemployment[i] / data_2010Q1$unemployment) * 100
 }
-
 ```
+
+## Calculando a correção em taxa de variação:
+```{r, echo = FALSE}
+correl <-  cor(us_change %>% 
+      select(-"Quarter")) %>% round(2)
+
+corrplot::corrplot(correl, 
+                   type = "upper",
+                   tl.col = "black",
+)
+```
+
+## Calculando a correção em número indice:
+```{r, echo = FALSE}
+correl <-  cor(indexed_data %>% 
+      select(-"quarter")) %>% round(2)
+
+corrplot::corrplot(correl, 
+                   type = "upper",
+                   tl.col = "black",
+)
+```
+
+## Item b) Análise das Correlações:
+Não há diferença na correlações calculadas das duas formas.
+
+## Item c) Gráfico que demonstrar a evolução do salário no período:
+```{r, fig.width=6, fig.height=3}
+indexed_data %>% 
+  ggplot() +
+  geom_col(aes(x = quarter, y = income))
+```
+
+
+## Item c) Outros gráficos para fomentar a análise dos dados ao longo do tempo:
+```{r}
+p_consumption <- indexed_data %>% 
+  ggplot( aes(x = quarter, y = consumption) ) +
+  geom_line()
+
+p_income <- indexed_data %>% 
+  ggplot( aes(x = quarter, y = income) ) +
+  geom_line()
+
+p_production <- indexed_data %>% 
+  ggplot( aes(x = quarter, y = production) ) +
+  geom_line()
+
+p_savings <- indexed_data %>% 
+  ggplot( aes(x = quarter, y = savings) ) +
+  geom_line()
+```
+
+```{r}
+multiplot(p_income, p_consumption, p_production, p_savings)
+```
+
+## Item d) Conclusão da análise dos gráficos:
+Com o aumento do consumo há pequenos aumentos no salário e consequentemente no consumo e nos investimentos.
+
+## Item e) Movimentos bruscos e atípidos:
+Há este tipo de ocorrências com o salário e investimento, em decorrência da crise econômica de 2008, a qual afetou muito o EUA.
