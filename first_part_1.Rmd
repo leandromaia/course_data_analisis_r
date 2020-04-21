@@ -54,7 +54,7 @@ for(i in 1:length(indexed_data$savings)){
 }
 
 for(i in 1:length(indexed_data$unemployment)){
-  indexed_data$unemployment[i] <- (indexed_data$unemployment[i] / data_2010Q1$unemployment) * 100
+  indexed_data$unemployment[i] <- (indexed_data$unemployment[i] / (data_2010Q1$unemployment + 1)) * 100
 }
 ```
 
