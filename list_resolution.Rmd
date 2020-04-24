@@ -15,6 +15,8 @@ library(plotly)
 library(seasonal)
 library(esquisse)
 library(corrplot)
+library(ggplot2)
+library(forecast)
 
 source(paste(getwd(), 'multiplot.R', sep = "/"))
 ```
@@ -125,16 +127,48 @@ Resposta -> Com o aumento do consumo há pequenos aumentos no salário e consequ
 ## e) Movimentos bruscos e atípidos:
 Resposta -> Há este tipo de ocorrências com o salário e investimento, em decorrência da crise econômica de 2008, a qual afetou muito o EUA.
 
+
+
 # 2.Séries de tempo, ciclo, sazonalidade e tendência
 
-## a) Load the file us_change and
+## a) Leia os dados contidos no arquivo "retail.xlsx". Qual cuidado adicional você
+precisou ter ao realizar essa importação?
+Resposta -> Foi necessário pular a primeira linha.
 ```{r}
 file_path = paste(getwd(), "retail.xlsx", sep = "/")
+retail <- readxl::read_excel(path = file_path, skip = 1) %>% janitor::clean_names()
+```
 
-retail_data <- readxl::read_excel(path = file_path, skip = 1) %>% janitor::clean_names()
-retail_time_series <- ts(retail_data$a3349335t, start = c(1982, 1), frequency = 12)
+## b) Selecione uma das variáveis e as converta para o formato "time series"
+```{r}
+time_series <- ts(retail$a3349627v, start = c(1982, 1), frequency = 12)
+```
 
+## c) Explore a série escolhida por meio da construção de gráficos. Em particular,
+se estiver utilizando o R, teste as funções ggseasonplot e ggmonthplot.
+
+```{r}
+plot(time_series)
 ```
 
 
+```{r}
+ggmonthplot(time_series)
+```
 
+``` {r}
+ggseasonplot(time_series)
+```
+
+## O que você consegue identificar em termos de ciclo, sazonalidade e tendência?
+Resposta -> Em questão de tendências ficou fácil observar que houve crescimento das venda ao longo dos anos. E que com o passar dos anos os picos de vendas no mês de setembro foram aumentando. Com isso, há um fator positivo de sazonalidade no mês de setembro.
+
+
+## d) Decomponha a série utilizando o método X11.
+``` {r}
+x11 <- time_series %>% seas(x11 = "")
+autoplot(x11) +
+  ggtitle("x11")
+```
+##  Ele revela algum outlier ou padrões anômalos não identificados anteriormente?
+Resposta -> Há picos apresentados em REMINDER que demonstram outlier em meados do fim da década de 80.
